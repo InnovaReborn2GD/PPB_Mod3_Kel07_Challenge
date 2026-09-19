@@ -11,7 +11,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final List<Map<String, String>> teamMembers = [
-    {'Nama': 'Galileo Athari Muhammad', 'NIM': '21120124130099'},
+    {'Nama': 'Galileo Athari Muhammad', 'NIM': '2110124130099'},
   ];
 
   @override
@@ -50,49 +50,40 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 32),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Center(
-                  child: Container(
-                    width: 100.0,
-                    height: 100.0,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(
-                          'https://avatars.githubusercontent.com/InnovaReborn2GD',
-                        ),
+                Container(
+                  width: 100.0,
+                  height: 100.0,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(
+                        'https://avatars.githubusercontent.com/InnovaReborn2GD',
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32.0),
+                const SizedBox(height: 16.0),
                 for (var member in teamMembers)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          member['Nama'] ?? 'No Name',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Column(
+                    children: [
+                      Text(
+                        member['Nama'] ?? 'No Name',
+                        style: const TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 8.0),
-                        Text(
-                          member['NIM'] ?? 'No NIM',
-                          style: const TextStyle(fontSize: 16.0),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Text(
+                        member['NIM'] ?? 'No NIM',
+                        style: const TextStyle(fontSize: 16.0),
+                      ),
+                    ],
                   ),
               ],
             ),
