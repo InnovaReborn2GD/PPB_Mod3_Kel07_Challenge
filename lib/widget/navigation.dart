@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../screens/detail.dart';
+import '../screens/favorites.dart';
 import '../screens/home.dart';
 import '../screens/profile.dart';
 
@@ -11,6 +14,16 @@ class NavigationPage extends StatefulWidget {
 
 class _NavigationPageState extends State<NavigationPage> {
   int _currentIndex = 0;
+  final Set<String> _favoriteCountries = {};
+  List<Country> _countries = [];
+
+  void _toggleFavorite(Country country) {
+    setState(() {
+      if (!_favoriteCountries.add(country.name)) {
+        _favoriteCountries.remove(country.name);
+      }
+    });
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -20,8 +33,25 @@ class _NavigationPageState extends State<NavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      const HomePage(),
+    final pages = [
+      HomePage(
+        favoriteCountries: _favoriteCountries,
+        onFavoriteToggle: (country) {
+          _countries = [..._countries, country]
+              .fold<Map<String, Country>>({}, (map, item) {
+                map[item.name] = item;
+                return map;
+              })
+              .values
+              .toList();
+          _toggleFavorite(country);
+        },
+      ),
+      FavoritesPage(
+        countries: _countries,
+        favoriteCountries: _favoriteCountries,
+        onFavoriteToggle: _toggleFavorite,
+      ),
       ProfilePage(onHomeTap: () => _onTabTapped(0)),
     ];
 
@@ -31,14 +61,12 @@ class _NavigationPageState extends State<NavigationPage> {
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.favorite),
+            label: 'Favorites',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

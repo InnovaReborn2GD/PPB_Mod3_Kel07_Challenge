@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+
 import 'dart:convert';
 import 'dart:io';
+
 import 'detail.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Set<String> favoriteCountries;
+  final ValueChanged<Country> onFavoriteToggle;
+
+  const HomePage({
+    super.key,
+    required this.favoriteCountries,
+    required this.onFavoriteToggle,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -12,11 +21,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<Country>> countries;
+  final searchController = TextEditingController();
+  String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     countries = fetchCountries();
+    searchController.addListener(() {
+      setState(() {
+        searchQuery = searchController.text.trim().toLowerCase();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   Future<List<Country>> fetchCountries() async {
@@ -47,12 +69,43 @@ class _HomePageState extends State<HomePage> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No countries found'));
           }
-          
-          final list = snapshot.data!;
+
+          final list = snapshot.data!
+              .where(
+                (country) => country.name.toLowerCase().contains(searchQuery),
+              )
+              .toList();
           return ListView.builder(
-            itemCount: list.length,
+            itemCount: list.isEmpty ? 2 : list.length + 1,
             itemBuilder: (context, i) {
-              final country = list[i];
+              if (i == 0) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search country',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: searchQuery.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: searchController.clear,
+                            ),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                );
+              }
+
+              if (list.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: Text('No countries found')),
+                );
+              }
+
+              final country = list[i - 1];
               return Card(
                 child: ListTile(
                   leading: country.flagsPng != null
@@ -60,11 +113,29 @@ class _HomePageState extends State<HomePage> {
                       : const SizedBox(width: 50),
                   title: Text(country.name),
                   subtitle: Text(country.region),
+                  trailing: IconButton(
+                    icon: Icon(
+                      widget.favoriteCountries.contains(country.name)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: widget.favoriteCountries.contains(country.name)
+                          ? Colors.red
+                          : null,
+                    ),
+                    onPressed: () => widget.onFavoriteToggle(country),
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DetailPage(country: country),
+                        builder: (context) => DetailPage(
+                          country: country,
+                          isFavorite: widget.favoriteCountries.contains(
+                            country.name,
+                          ),
+                          onFavoriteToggle: () =>
+                              widget.onFavoriteToggle(country),
+                        ),
                       ),
                     );
                   },
